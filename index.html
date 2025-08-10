@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Help Map</title>
+    <meta name="description" content="Find local help providers and report traffic issues in your area">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2196F3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Local Help Map">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="leaflet.css" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">🆘 Local Help Map</h1>
+            <nav class="nav">
+                <button class="nav-btn active" data-view="map">Map</button>
+                <button class="nav-btn" data-view="register">Register</button>
+                <button class="nav-btn" data-view="traffic">Traffic</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Map View -->
+        <section id="map-view" class="view active">
+            <div class="map-container">
+                <div class="map-controls">
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="Search by category or location...">
+                        <button id="search-btn">🔍</button>
+                    </div>
+                    <div class="filter-controls">
+                        <select id="category-filter">
+                            <option value="">All Categories</option>
+                            <option value="First Aid / Medical">First Aid / Medical</option>
+                            <option value="Mechanic / Electrician">Mechanic / Electrician</option>
+                            <option value="Food / Shelter">Food / Shelter</option>
+                            <option value="Water / Transport">Water / Transport</option>
+                            <option value="Blood Donor">Blood Donor</option>
+                            <option value="Phone Charging / Power Backup">Phone Charging / Power Backup</option>
+                            <option value="Traffic Issue">Traffic Issue</option>
+                        </select>
+                        <div class="view-toggle">
+                            <button class="toggle-btn active" data-type="helpers">Helpers</button>
+                            <button class="toggle-btn" data-type="traffic">Traffic</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="map"></div>
+                <div class="offline-indicator" id="offline-indicator" style="display: none;">
+                    📱 Offline Mode - Showing cached data
+                </div>
+            </div>
+        </section>
+
+        <!-- Register Helper View -->
+        <section id="register-view" class="view">
+            <div class="container">
+                <h2>Register as Helper</h2>
+                <form id="helper-form" class="form">
+                    <div class="form-group">
+                        <label for="helper-name">Name *</label>
+                        <input type="text" id="helper-name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="helper-category">Category *</label>
+                        <select id="helper-category" required>
+                            <option value="">Select Category</option>
+                            <option value="First Aid / Medical">First Aid / Medical</option>
+                            <option value="Mechanic / Electrician">Mechanic / Electrician</option>
+                            <option value="Food / Shelter">Food / Shelter</option>
+                            <option value="Water / Transport">Water / Transport</option>
+                            <option value="Blood Donor">Blood Donor</option>
+                            <option value="Phone Charging / Power Backup">Phone Charging / Power Backup</option>
+                            <option value="Traffic Issue">Traffic Issue</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="helper-availability">Availability Hours *</label>
+                        <input type="text" id="helper-availability" placeholder="e.g., 9 AM - 6 PM, 24/7" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="helper-contact">Contact Info (Optional)</label>
+                        <input type="text" id="helper-contact" placeholder="Phone number or email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Location *</label>
+                        <div class="location-controls">
+                            <button type="button" id="detect-location" class="btn btn-secondary">
+                                📍 Detect My Location
+                            </button>
+                            <button type="button" id="pin-location" class="btn btn-secondary">
+                                📌 Pin on Map
+                            </button>
+                        </div>
+                        <div id="location-status" class="location-status"></div>
+                        <input type="hidden" id="helper-lat" required>
+                        <input type="hidden" id="helper-lng" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Register as Helper</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Traffic Report View -->
+        <section id="traffic-view" class="view">
+            <div class="container">
+                <h2>Report Traffic Issue</h2>
+                <form id="traffic-form" class="form">
+                    <div class="form-group">
+                        <label for="traffic-type">Type of Issue *</label>
+                        <select id="traffic-type" required>
+                            <option value="">Select Issue Type</option>
+                            <option value="accident">Accident</option>
+                            <option value="roadblock">Roadblock</option>
+                            <option value="jam">Traffic Jam</option>
+                            <option value="waterlogging">Waterlogging</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="traffic-severity">Severity *</label>
+                        <select id="traffic-severity" required>
+                            <option value="">Select Severity</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="traffic-description">Description (Optional)</label>
+                        <textarea id="traffic-description" placeholder="Additional details about the traffic issue..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="traffic-photo">Photo Upload (Optional)</label>
+                        <input type="file" id="traffic-photo" accept="image/*">
+                        <div id="photo-preview"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Location *</label>
+                        <div class="location-controls">
+                            <button type="button" id="traffic-detect-location" class="btn btn-secondary">
+                                📍 Detect My Location
+                            </button>
+                            <button type="button" id="traffic-pin-location" class="btn btn-secondary">
+                                📌 Pin on Map
+                            </button>
+                        </div>
+                        <div id="traffic-location-status" class="location-status"></div>
+                        <input type="hidden" id="traffic-lat" required>
+                        <input type="hidden" id="traffic-lng" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Report Traffic Issue</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Local Help Map. Built for community support.</p>
+        </div>
+    </footer>
+
+    <!-- Modal for Map Pinning -->
+    <div id="map-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Pin Location on Map</h3>
+            <div id="modal-map"></div>
+            <p>Click on the map to select your location</p>
+            <button id="confirm-location" class="btn btn-primary">Confirm Location</button>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="loading" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Firebase SDK -->
+    <script src="firebase-app-compat.js"></script>
+    <script src="firebase-firestore-compat.js"></script>
+    <script src="firebase-storage-compat.js"></script>
+    
+    <!-- Leaflet JS -->
+    <script src="leaflet.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="firebase-config.js"></script>
+    <script src="app.js"></script>
+    <script src="sw.js"></script>
+</body>
+</html>
